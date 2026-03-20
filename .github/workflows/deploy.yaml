@@ -18,7 +18,7 @@
         - name: configure aws credentials
           uses: aws-actions/configure-aws-credentials@v1.7.0
           with:
-            role-to-assume: "arn:aws:iam:: {{ secrets.AWS_ACCOUNT_ID }} :role/GitHub"
+            role-to-assume: "arn:aws:iam::{{ secrets.AWS_ACCOUNT_ID }}:role/GitHub"
             role-session-name: GitHub_to_AWS_via_FederatedOIDC
             aws-region: "eu-west-1"
         - name: Sts GetCallerIdentity
