@@ -43,6 +43,12 @@
             docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
             echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:latest" >> $GITHUB_OUTPUT
 
+        - name: Configure AWS credentials
+          uses: aws-actions/configure-aws-credentials@v4 # Used to fetch AWS credentials. Secretes are configured on github and below secrets are passed to it.
+          with:
+            aws-region: ${{ secrets.AWS_REGION}}
+            role-to-assume: ${{ secrets.AWS_ROLE }}
+
         - name: Pull the docker image on the server
           uses: appleboy/ssh-action@v1
           with:
