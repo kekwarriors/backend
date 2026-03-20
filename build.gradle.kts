@@ -5,6 +5,7 @@ val logback_version: String = "1.5.32"
 plugins {
     application
     kotlin("jvm") version "2.3.20"
+    id("io.ktor.plugin") version "3.4.1"
 }
 
 application {
@@ -13,6 +14,12 @@ application {
 
 repositories {
     mavenCentral()
+}
+
+ktor {
+    fatJar {
+        archiveFileName.set("backend.jar")
+    }
 }
 
 dependencies {

@@ -1,31 +1,25 @@
 package sudoku
 
-import io.ktor.network.selector.*
-import io.ktor.network.sockets.*
-import io.ktor.utils.io.*
-import kotlinx.coroutines.*
+import io.ktor.server.application.*
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
+import io.ktor.server.routing.*
+import io.ktor.server.websocket.*
+import io.ktor.websocket.*
 
-fun main(args: Array<String>) {
-    runBlocking {
-        val selectorManager = SelectorManager(Dispatchers.IO)
-        val serverSocket = aSocket(selectorManager).tcp().bind("127.0.0.1", 40000)
-        println("Server is listening at ${serverSocket.localAddress}")
-        while (true) {
-            val socket = serverSocket.accept()
-            println("Accepted $socket")
-            launch {
-                val receiveChannel = socket.openReadChannel()
-                val sendChannel = socket.openWriteChannel(autoFlush = true)
-                sendChannel.writeStringUtf8("Please enter your name\n")
-                try {
-                    while (true) {
-                        val name = receiveChannel.readUTF8Line()
-                        sendChannel.writeStringUtf8("Hello, $name!\n")
+fun main() {
+    embeddedServer(Netty, port = 40000) {
+        install(WebSockets)
+        routing {
+            webSocket("/chat") {
+                send("Please enter your name")
+                for (frame in incoming) {
+                    if (frame is Frame.Text) {
+                        val name = frame.readText()
+                        send("Hello, $name!")
                     }
-                } catch (e: Throwable) {
-                    socket.close()
                 }
             }
         }
-    }
+    }.start(wait = true)
 }

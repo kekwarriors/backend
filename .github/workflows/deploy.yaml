@@ -1,0 +1,64 @@
+  on:
+    push:
+      branches: [ main ]
+
+  env:
+    AWS_REGION : "eu-west-1"
+    ECR_REPOSITORY: "kekwarriors/backend"
+
+  permissions:
+    id-token: write
+    contents: read
+  jobs:
+    AssumeRoleAndCallIdentity:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Git clone the repository
+          uses: actions/checkout@v4
+        - name: configure aws credentials
+          uses: aws-actions/configure-aws-credentials@v1.7.0
+          with:
+            role-to-assume: "arn:aws:iam:: {{ secrets.AWS_ACCOUNT_ID }} :role/GitHub"
+            role-session-name: GitHub_to_AWS_via_FederatedOIDC
+            aws-region: "eu-west-1"
+        - name: Sts GetCallerIdentity
+          run: |
+            aws sts get-caller-identity
+
+        - name: Login to Amazon ECR
+          id: login-ecr
+          uses: aws-actions/amazon-ecr-login@v1
+
+        - name: Registry
+          id: out-registry
+          run: echo "The registry is ${{ steps.login-ecr.outputs.registry }}"
+
+        - name: Build, tag and push to Amazon ECR
+          id: build-image
+          env:
+            ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+            IMAGE_TAG: ${{ github.sha }}
+          run: |
+            docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
+            docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+            echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:latest" >> $GITHUB_OUTPUT
+
+        - name: Execute remote SSH commands using password
+          uses: appleboy/ssh-action@v1
+          with:
+            host: ${{ secrets.EC2_HOST }}
+            username: ${{ secrets.EC2_USER }}
+            key: ${{ secrets.EC2_SSH_KEY }}
+            script: |
+              # 1. Login to ECR (using the instance's IAM role)
+              aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
+              
+              # 2. Stop and remove the old container (if it exists)
+              docker stop backend || true
+              docker rm backend || true
+              
+              # 3. Pull the latest image
+              docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/$ECR_REPOSITORY:latest
+              
+              # 4. Run the new container
+              docker run -d --name backend -p 80:8080 ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/$ECR_REPOSITORY:latest
