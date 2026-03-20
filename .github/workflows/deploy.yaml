@@ -10,7 +10,7 @@
     id-token: write
     contents: read
   jobs:
-    AssumeRoleAndCallIdentity:
+    DeployToEC2:
       runs-on: ubuntu-latest
       steps:
         - name: Git clone the repository
@@ -43,7 +43,7 @@
             docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
             echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:latest" >> $GITHUB_OUTPUT
 
-        - name: Execute remote SSH commands using password
+        - name: Pull the docker image on the server
           uses: appleboy/ssh-action@v1
           with:
             host: ${{ secrets.EC2_HOST }}
