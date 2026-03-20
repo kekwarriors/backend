@@ -54,11 +54,11 @@
               aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
               
               # 2. Stop and remove the old container (if it exists)
-              docker stop backend || true
-              docker rm backend || true
+              docker stop $ECR_REPOSITORY || true
+              docker rm $ECR_REPOSITORY || true
               
               # 3. Pull the latest image
               docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/$ECR_REPOSITORY:latest
               
               # 4. Run the new container
-              docker run -d --name backend -p 80:8080 ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/$ECR_REPOSITORY:latest
+              docker run -d --name $ECR_REPOSITORY -p 80:8080 ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/$ECR_REPOSITORY:latest
