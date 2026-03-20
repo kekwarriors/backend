@@ -49,6 +49,8 @@
             host: ${{ secrets.EC2_HOST }}
             username: ${{ secrets.EC2_USER }}
             key: ${{ secrets.EC2_SSH_KEY }}
+            env:
+              ECR_REPOSITORY: $ECR_REPOSITORY
             script: |
               # 1. Login to ECR (using the instance's IAM role)
               aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-west-1.amazonaws.com
