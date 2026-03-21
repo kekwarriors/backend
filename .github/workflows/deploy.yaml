@@ -4,7 +4,8 @@
 
   env:
     AWS_REGION : "eu-west-1"
-    ECR_REPOSITORY: "kekwarriors/backend"
+    ECR_NAMESPACE: "kekwarriors"
+    ECR_REPOSITORY: "kekwarriors_backend"
 
   permissions:
     id-token: write
@@ -39,9 +40,9 @@
             ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
             IMAGE_TAG: ${{ github.sha }}
           run: |
-            docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
-            docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
-            echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:latest" >> $GITHUB_OUTPUT
+            docker build -t $ECR_REGISTRY/$ECR_NAMESPACE/$ECR_REPOSITORY:latest .
+            docker push $ECR_REGISTRY/$ECR_NAMESPACE/$ECR_REPOSITORY:latest
+            echo "image=$ECR_REGISTRY/$ECR_NAMESPACE/$ECR_REPOSITORY:latest" >> $GITHUB_OUTPUT
 
         - name: Configure AWS credentials
           uses: aws-actions/configure-aws-credentials@v4 # Used to fetch AWS credentials. Secretes are configured on github and below secrets are passed to it.
@@ -66,7 +67,7 @@
               docker rm $ECR_REPOSITORY || true
               
               # 3. Pull the latest image
-              docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-west-1.amazonaws.com/$ECR_REPOSITORY:latest
+              docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-west-1.amazonaws.com/$ECR_NAMESPACE/$ECR_REPOSITORY:latest
               
               # 4. Run the new container
-              docker run -d --name $ECR_REPOSITORY -p 40000:40000 ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-west-1.amazonaws.com/$ECR_REPOSITORY:latest
+              docker run -d --name $ECR_REPOSITORY -p 40000:40000 ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-west-1.amazonaws.com/$ECR_NAMESPACE/$ECR_REPOSITORY:latest
