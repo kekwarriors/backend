@@ -5,7 +5,7 @@
   env:
     AWS_REGION : "eu-west-1"
     ECR_NAMESPACE: "kekwarriors"
-    ECR_REPOSITORY: "kekwarriors_backend"
+    ECR_REPOSITORY: "backend"
 
   permissions:
     id-token: write
