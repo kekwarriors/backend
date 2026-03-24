@@ -15,24 +15,18 @@
       runs-on: ubuntu-latest
       steps:
         - name: Git clone the repository
-          uses: actions/checkout@v4
+          uses: actions/checkout@v6
+
         - name: configure aws credentials
-          uses: aws-actions/configure-aws-credentials@v1.7.0
+          uses: aws-actions/configure-aws-credentials@v6.0.0
           with:
             role-to-assume: "arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/GitHub"
             role-session-name: GitHub_to_AWS_via_FederatedOIDC
             aws-region: "eu-west-1"
-        - name: Sts GetCallerIdentity
-          run: |
-            aws sts get-caller-identity
 
         - name: Login to Amazon ECR
           id: login-ecr
-          uses: aws-actions/amazon-ecr-login@v1
-
-        - name: Registry
-          id: out-registry
-          run: echo "The registry is ${{ steps.login-ecr.outputs.registry }}"
+          uses: aws-actions/amazon-ecr-login@v2
 
         - name: Build, tag and push to Amazon ECR
           id: build-image
@@ -45,7 +39,7 @@
             echo "image=$ECR_REGISTRY/$ECR_NAMESPACE/$ECR_REPOSITORY:latest" >> $GITHUB_OUTPUT
 
         - name: Configure AWS credentials
-          uses: aws-actions/configure-aws-credentials@v4 # Used to fetch AWS credentials. Secretes are configured on github and below secrets are passed to it.
+          uses: aws-actions/configure-aws-credentials@v6
           with:
             aws-region: eu-west-1
             role-to-assume: ${{ secrets.AWS_ROLE }}
