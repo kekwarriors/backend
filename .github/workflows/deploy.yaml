@@ -64,4 +64,4 @@
               docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-west-1.amazonaws.com/$ECR_NAMESPACE/$ECR_REPOSITORY:latest
               
               # 4. Run the new container
-              docker run -d --name $ECR_REPOSITORY -p 40000:40000 -e KEYSTORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }} ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-west-1.amazonaws.com/$ECR_NAMESPACE/$ECR_REPOSITORY:latest
+              docker run -d --name $ECR_REPOSITORY -p 40000:40000 -p 443:443 -p 80:80 -e KEYSTORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }} ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-west-1.amazonaws.com/$ECR_NAMESPACE/$ECR_REPOSITORY:latest
