@@ -15,7 +15,7 @@ fun main() {
     val keystorePassword = System.getenv("KEYSTORE_PASSWORD")
         ?: error("KEYSTORE_PASSWORD environment variable not set")
 
-    val keyStoreFile = File("keystore.p12")
+    val keyStoreFile = File("/app/keystore.p12")
     val keyStore = KeyStore.getInstance("PKCS12").apply {
         load(FileInputStream(keyStoreFile), keystorePassword.toCharArray())
     }
